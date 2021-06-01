@@ -12,10 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.9",
     "google": "^2.1.0",
     "jsdom": "^16.6.0",
     "node-html-parser": "^3.3.4",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "request-promise": "^4.2.6"
   },
   "engines": {
     "node": ">=14.17.0",

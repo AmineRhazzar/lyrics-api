@@ -1,27 +1,30 @@
-const axios = require("axios");
-var HTMLParser = require("node-html-parser");
-const jsdom = require("jsdom");
-const fs = require("fs");
+//https://genius.com/Billie-eilish-six-feet-under-lyrics
 
-const removeScriptTags = (htmlDocument) => {
-    const scriptTags = htmlDocument.getElementsByTagName("script");
-    var i = 4;
-    while (i--) {
-        console.log(scriptTags[i]);
+const rp = require("request-promise");
+const cheerio = require("cheerio");
+
+const url = "https://genius.com/Panic-at-the-disco-house-of-memories-lyrics";
+
+rp(url).then((html) => {
+    const $ = cheerio.load(html);
+    var children = $("div.Lyrics__Root-sc-1ynbvzw-0").contents();
+    for (let i = 0; i < 5; i++) {
+        var currNode = children[i + ""];
+        var currLyrics = "";
+// 
+        currNode?.children?.forEach((ele) => {
+            if (ele.type === "text") {
+                currLyrics += ele.data+"\n";
+            } else if (ele.name === "a") {
+                ele.children.forEach((childel) => {
+                    childel.children.forEach((ele1) => {
+                        if (ele1.type === "text") {
+                            currLyrics += ele1.data + "\n"
+                        }
+                    })
+                })
+            }
+        });
+        console.log(currLyrics);
     }
-}
-
-
-axios
-    .get("https://genius.com/Billie-eilish-six-feet-under-lyrics")
-    .then((res) => res.data)
-    .then((body) => {
-        body.replace(/<script>CURRENT_USER = null;(.*)<\/script>/, "");
-        return new jsdom.JSDOM(body);
-    })
-    .then(dom => dom.window.document)
-    .then((dom) => {
-        console.log(dom.querySelector("div.lyrics p"));
-   
-    })
-    .catch((err) => console.log(err));
+});

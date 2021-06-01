@@ -38,4 +38,4 @@ const getLyrics = (songName, songMainArtist, cb) => {
     google(`${songName} ${songMainArtist} lyrics`, cb);
 };
 
-getLyrics("mean it", "gracie abrams", commonCallBack);
+getLyrics("", "gracie abrams", commonCallBack);

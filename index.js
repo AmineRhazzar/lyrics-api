@@ -1,41 +1,35 @@
-var google = require("google");
-var HTMLParser = require("node-html-parser");
+const google = require("google");
+const cheerio = require("cheerio");
+const fs = require("fs");
 
+const { parseGoogleForLyrics, parseGoogleForLink } = require("./googleSearch");
+const getLyricsFromGeniusLink = require("./geniusSearch");
 
-
-const googleResultsCallback = (err, res) => {
-    if (err) return undefined;
-    else {
-        const root = HTMLParser.parse(res.body);
-        var lyrics = root.querySelector(
-            "div.hwc div[class='BNeawe tAd8D AP7Wnd'] div div[class='BNeawe tAd8D AP7Wnd']"
-        )?.childNodes[0]?.rawText;
-
-        lyrics = lyrics ? lyrics : "none";
-
-        return lyrics;
-    }
-};
-
-const geniusResultsCallback = () => {
-    return "yay";
-}
-
-const commonCallBack = (err, res) => {
-    var lyrics;
-    const googleLyrics = googleResultsCallback(err, res);
-    if (googleLyrics !== "none") {
-        lyrics = googleLyrics;
-    } else {
-        lyrics = geniusResultsCallback();
-    }
+const handleLyricsExample = (lyrics) => {
+    //this function will take the lyrics in arguments and handle that accordingly to our needs
     console.log(lyrics);
-}
-
-
-
-const getLyrics = (songName, songMainArtist, cb) => {
-    google(`${songName} ${songMainArtist} lyrics`, cb);
 };
 
-getLyrics("", "gracie abrams", commonCallBack);
+
+const getLyrics = (songName, songMainArtist, handleLyrics) => {
+    google.resultsPerPage = 10;
+    google(`${songName} ${songMainArtist} lyrics`, (err, { body }) => {
+    
+        //parse body for lyrics
+        const googleLyrics = parseGoogleForLyrics(body);
+    
+        if (googleLyrics) {
+            //lyrics found on google
+            handleLyrics(googleLyrics);
+        } else {
+            //extract genius links from google search results
+            const geniusLinks = parseGoogleForLink(body);
+    
+            getLyricsFromGeniusLink(geniusLinks[0]).then(handleLyrics);
+        }
+    });
+};
+
+
+module.exports = getLyrics;
+

@@ -1,30 +1,38 @@
-//https://genius.com/Billie-eilish-six-feet-under-lyrics
-
-const rp = require("request-promise");
+const axios = require("axios");
 const cheerio = require("cheerio");
 
-const url = "https://genius.com/Panic-at-the-disco-house-of-memories-lyrics";
 
-rp(url).then((html) => {
-    const $ = cheerio.load(html);
-    var children = $("div.Lyrics__Root-sc-1ynbvzw-0").contents();
-    for (let i = 0; i < 5; i++) {
-        var currNode = children[i + ""];
-        var currLyrics = "";
-// 
-        currNode?.children?.forEach((ele) => {
-            if (ele.type === "text") {
-                currLyrics += ele.data+"\n";
-            } else if (ele.name === "a") {
-                ele.children.forEach((childel) => {
-                    childel.children.forEach((ele1) => {
-                        if (ele1.type === "text") {
-                            currLyrics += ele1.data + "\n"
-                        }
-                    })
-                })
+const getLyricsFromGeniusLink = (url) => {
+    return axios.get(url)
+        .then(res => res.data)
+        .then(body => {
+            const $ = cheerio.load(body);
+            const lyricsContainer = $("div.Lyrics__Root-sc-1ynbvzw-0");
+            const children = lyricsContainer.contents();
+            var geniusLyrics = ""
+            for (let i = 0; i < children.length; i++){
+                currNode = children[i + ""];
+                currNode?.children?.forEach((child) => {
+                    if (child.type === "text") {
+                        geniusLyrics += child.data + "\n";
+                    } else if (child.name === "a") {
+                        child.children.forEach((anchorChild) => {
+                            anchorChild.children.forEach((grandChild) => {
+                                if (grandChild.type === "text") {
+                                    geniusLyrics += grandChild.data + "\n";
+                                }
+                            })
+                        })
+                    }
+                });
             }
-        });
-        console.log(currLyrics);
-    }
-});
+            if (!geniusLyrics) {
+                throw "no lyrics found";
+            }
+        })
+        .catch(err =>{console.log(err)});
+}
+
+module.exports = getLyricsFromGeniusLink;
+
+

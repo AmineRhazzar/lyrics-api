@@ -26,9 +26,7 @@ const getLyricsFromGeniusLink = (url) => {
                     }
                 });
             }
-            if (!geniusLyrics) {
-                throw "no lyrics found";
-            }
+            return geniusLyrics;
         })
         .catch(err =>{console.log(err)});
 }
